@@ -6,10 +6,10 @@ class Game
     @throw_cnt = 0
     @current_frame = 1
     @frame_score = 0
-    @score_array = Array.new()
+    @score_array = []
     @score_sum = 0
   end
-
+  
   def throw(cnt)
     #投球数
     @throw_cnt += 1
@@ -23,31 +23,41 @@ class Game
     end
   end
 
+  #合計スコアを計算する
   def score_sum
-    spare_flg = 0
+    is_spare = false
+    #フレームごとにスコアを取り出す
     @score_array.each_slice(2) do |val1, val2|
       @frame_score = val1 + val2
-      if spare_flg == 1
+
+      #前のフレームがスペアだった場合
+      if is_spare
         @score_sum += @frame_score + val1
-        spare_flg = 0
+        is_spare = false
+      #前のフレームがスペアでない場合
       else
         @score_sum += @frame_score
       end
+
+      #スペアだった場合フラグを立てる
       if @frame_score == 10
-        spare_flg = 1
+        is_spare = true
       end
     end
-    return @score_sum
+    @score_sum
   end
 
+  #現在のフレームを返す
   def current_frame
     @current_frame
   end
 
+  #合計スコアを返す
   def score
     score_sum
   end
 
+  #表示メソッド
   def display
     print "現在のフレームは：", @current_frame, "\n"
     print "現在の合計スコアは：", @score_sum, "\n"
@@ -58,37 +68,37 @@ end
 unless __FILE__ == $0
   describe Game do
     it '一投目1点、2投目2点だったら3ptになる' do
-      game = Game.new()
+      game = Game.new
 
-      game.throw(1)
-      game.throw(2)
+      game.throw 1
+      game.throw 2
 
       game.score.should == 3
     end
 
     it '1フレーム目スペア、2フレーム目1投目5点だったら20ptになる' do
-      game = Game.new()
+      game = Game.new
 
-      game.throw(5)
-      game.throw(5)
+      game.throw 5
+      game.throw 5
 
-      game.throw(5)
-      game.throw(0)
+      game.throw 5
+      game.throw 0
 
-      game.score().should == 20
+      game.score.should == 20
     end
 
     it '1投ガーターたったら現在のフレームは1になること' do
-      game = Game.new()
-      game.throw(0)
+      game = Game.new
+      game.throw 0
 
       game.current_frame.should == 1
     end
 
     it '2投ガーターだったら現在のフレームは2になること' do
-      game = Game.new()
-      game.throw(0)
-      game.throw(0)
+      game = Game.new
+      game.throw 0
+      game.throw 0
 
       game.current_frame.should == 2
     end
